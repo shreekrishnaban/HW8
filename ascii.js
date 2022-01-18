@@ -44,7 +44,7 @@ var animationTracker = (function() {
     }
 
     function decreaseSpeed() {
-        currentSpeed -= 50;
+        currentSpeed = 50;
     }
 
     function resetSpeed() {
