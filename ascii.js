@@ -1,6 +1,6 @@
 "use strict"
 window.onload = pageLoad;
-var elements = new Object;
+const elements = new Object;
 
 //MODULE : animation tracker i.e. responsible for all tracking and animating
 var animationTracker = (function() {
@@ -84,6 +84,7 @@ var animationTracker = (function() {
 
 
 })();
+
 
 // Initialize DOM elements
 function initializeElements() {
