@@ -1,12 +1,89 @@
 "use strict"
 window.onload = pageLoad;
 var elements = new Object;
-var currentSpeed = 250;
-var currentAnimationText = "";
-var intervalId = null;
 
-var animArray = [];
-var animIndex = 0; //Initiate animation text from first index
+//MODULE : animation tracker i.e. responsible for all tracking and animating
+var animationTracker = (function() {
+    var currentSpeed = 250;
+    var currentAnimationText = "";
+    var intervalId = null;
+
+    var animArray = [];
+    var animIndex = 0; //Initiate animation text from first index
+
+    function setAnimationText(text) {
+        currentAnimationText = text;
+        animArray = text.split('====\n');
+    }
+
+    function initIndex() {
+        animIndex = 0;
+    }
+
+    function clearAnimationInterval() {
+        if (intervalId)
+            clearInterval(intervalId);
+    }
+
+    function startInterval() {
+        intervalId = setInterval(function() {
+            if (animIndex === animArray.length) {
+                animIndex = 0;
+            }
+            setMainTextValue(animArray[animIndex++]);
+        }, currentSpeed);
+    }
+
+    function setMainTextValue(value) {
+        elements.maintxt.value = value;
+    }
+
+    function resetAnimation() {
+        clearAnimationInterval();
+        setMainTextValue(currentAnimationText);
+    }
+
+    function decreaseSpeed() {
+        currentSpeed -= 50;
+    }
+
+    function resetSpeed() {
+        currentSpeed = 250;
+    }
+
+    return {
+        currentAnimationText: function() {
+            return currentAnimationText;
+        },
+
+        setCurrentAnimationText: function(text) {
+            setAnimationText(text);
+        },
+        resetAnimationIndex: function() {
+            initIndex();
+        },
+        clearAnimationInterval: function() {
+            clearAnimationInterval();
+        },
+        startInterval: function() {
+            startInterval();
+        },
+        resetAnimation: function() {
+            resetAnimation();
+        },
+        decreaseSpeed: function() {
+            decreaseSpeed();
+        },
+        resetSpeed: function() {
+            resetSpeed();
+        }
+
+
+    }
+
+
+
+})();
 
 // Initialize DOM elements
 function initializeElements() {
@@ -33,20 +110,21 @@ function pageLoad(e) {
 
 //On button start click
 function start() {
-    currentAnimationText = elements.maintxt.value; // Set current animation value
-    //Do nothing if there's no text
-    if (!currentAnimationText)
+    animationTracker.setCurrentAnimationText(elements.maintxt.value)
+        //Do nothing if there's no text
+    if (!animationTracker.currentAnimationText())
         return;
     toggleinteractability(true);
-    animArray = elements.maintxt.value.split('====\n');
-    animIndex = 0; //Initiate animation text from first index
+    animationTracker.setCurrentAnimationText(elements.maintxt.value);
+    animationTracker.resetAnimationIndex();
     animationStart();
+
 }
 
 //Stop animation and reset controls
 function stop() {
     toggleinteractability(false);
-    animationStop();
+    animationTracker.resetAnimation();
 
 }
 
@@ -58,29 +136,9 @@ function toggleinteractability(isStarted) {
 }
 
 function animationStart() {
-    if (intervalId)
-        clearInterval(intervalId);
-
-    intervalId = setInterval(function() {
-        if (animIndex === animArray.length) {
-            animIndex = 0;
-        }
-        elements.maintxt.value = animArray[animIndex++];
-    }, currentSpeed);
-
+    animationTracker.clearAnimationInterval();
+    animationTracker.startInterval();
 }
-
-//Stop animation
-function animationStop() {
-    if (intervalId)
-        clearInterval(intervalId);
-    resetText();
-}
-
-function resetText() {
-    elements.maintxt.value = currentAnimationText;
-}
-
 
 //On text size change request
 var sizeChanged = function(e) {
@@ -97,10 +155,10 @@ var animationChanged = function(e) {
     //Change global value of currentspeed upon changes
 var speedChanged = function(e) {
     if (e.currentTarget.checked) {
-        currentSpeed -= 50;
+        animationTracker.decreaseSpeed();
         animationStart();
     } else {
-        currentSpeed = 250;
+        animationTracker.resetSpeed();
         animationStart();
 
     }
